@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RugbyBoard – Player View</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <main class="stage">
+      <div class="board-viewport" id="boardViewport">
+        <div class="board-wrap" id="boardWrap">
+          <div id="board" class="board">
+            <svg class="grid-overlay" id="grid" viewBox="0 0 1200 700"></svg>
+            <svg class="lines" viewBox="0 0 1200 700" aria-hidden="true">
+              <rect x="5" y="5" width="1190" height="690" fill="none" stroke="#fff" stroke-width="6" />
+            </svg>
+            <svg id="draw" viewBox="0 0 1200 700"></svg>
+            <div id="players"></div>
+            <div id="ball" class="ball"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="player-toolbar" style="position:fixed;bottom:0;left:0;right:0;background:#111;">
+    <button id="btnPrev">◀</button>
+    <button id="btnPlay">Play</button>
+    <button id="btnNext">▶</button>
+    <span id="frameInfo" style="color:white;margin-left:8px;">0/0</span>
+    <span id="playName" style="color:#0af;margin-left:auto;margin-right:8px;"></span>
+  </div>
+
+  <script type="module" src="js/viewer.js"></script>
+</body>
+</html>

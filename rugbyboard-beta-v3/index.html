@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>RugbyBoard Pro - Lavagna Tattica</title>
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="premium-overlay" id="premiumOverlay">
+        <div class="premium-card">
+            <button class="close-premium" id="closePremium">✕</button>
+            <div class="premium-icon">👑</div>
+            <h2 class="premium-title">Diventa Allenatore PRO</h2>
+            <p class="premium-desc">
+                Sblocca tutto il potenziale della tua lavagna tattica e porta il tuo team al livello successivo.
+            </p>
+            <ul class="premium-features">
+                <li>🎬 <strong>Animazione e Video</strong>: Registra ed esporta video delle tue giocate.</li>
+                <li>🛡️ <strong>Logo Personalizzato</strong>: Aggiungi lo stemma del tuo club alla lavagna.</li>
+                <li>☁️ <strong>Salvataggio Illimitato</strong>: Nessun limite alle tue strategie.</li>
+            </ul>
+            <button class="premium-btn" id="btnBuyPremium">
+                Sblocca Ora a soli 4.99€
+            </button>
+            <p style="font-size: 11px; opacity: 0.5; margin-top: 10px;">
+                Pagamento sicuro una tantum. Nessun abbonamento.
+            </p>
+        </div>
+    </div>
+
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>RugbyBoard Pro</h1>
+                <p>Accedi per utilizzare la lavagna</p>
+            </div>
+            <input type="email" id="loginEmail" class="login-input" placeholder="Email" />
+            <input type="password" id="loginPassword" class="login-input" placeholder="Password" />
+            <div class="auth-buttons">
+                <button class="login-btn" id="btnLogin">Accedi</button>
+                <button class="login-btn secondary" id="btnRegister">Registrati</button>
+            </div>
+            <div class="separator">o continua con</div>
+            <button class="google-btn" id="btnGoogle">
+                <i class="fab fa-google"></i> Google
+            </button>
+            <p id="loginMessage" class="login-message"></p>
+        </div>
+    </div>
+
+    <div id="successPopup" class="success-popup">
+        <span>✅</span>
+        <span id="successMessage">Giocata salvata correttamente!</span>
+    </p>
+
+    <button id="menuBtn" class="hamburger" aria-label="Apri pannello">☰</button>
+    <div id="scrim" class="scrim" aria-hidden="true"></div>
+
+    <div class="app" style="display: none;" id="mainApp">
+        <aside class="sidebar" id="sidebar">
+            <button id="closeMenu" class="close-drawer" aria-label="Chiudi">✕</button>
+            
+            <div class="group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>RugbyBoard Pro</h1>
+                    <div class="status-indicator" id="authStatus">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span id="statusText">Connessione...</span>
+                    </div>
+                </div>
+                <div id="firebaseStatus" class="firebase-status disconnected">
+                    ⚠️ Configura Firebase Console
+                </div>
+                <button class="btn primary" id="btnAuthAction">Esci</button>
+            </div>
+
+            <button id="btnSidebarPro" onclick="document.getElementById('premiumOverlay').style.display = 'flex'" 
+                     style="width: 100%; background: linear-gradient(45deg, #ffd400, #ffca00); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(255, 212, 0, 0.3);">
+                 <span>👑 PASSA A PRO</span>
+            </button>
+
+            <div class="group">
+                <strong>Controlli</strong>
+                <div class="row" style="grid-template-columns: 1fr;">
+                    <button class="btn" id="toggleLabels">Mostra etichette</button>
+                    <button class="btn alt" id="reset">Reimposta posizioni</button>
+                </div>
+                <label class="chk" style="display:flex;align-items:center;gap:8px;border:none;background:transparent;padding:0;box-shadow:none">
+                    <input type="checkbox" id="snapToggle"> Aggancia alla griglia
+                </label>
+                <label class="chk" style="display:flex;align-items:center;gap:8px;border:none;background:transparent;padding:0;box-shadow:none">
+                    <input type="checkbox" id="verticalField"> Campo verticale
+                </label>
+                
+               <div class="player-counter">
+                    <span>Giocatori: <span id="playerCount">0</span>/30</span>
+                    <span style="font-size: 11px; opacity: 0.7;">(15 blu + 15 rossi)</span>
+                    <button class="btn alt" id="addPlayerBtn" style="margin-left: auto;">+ Aggiungi Giocatore</button>
+                </div>
+
+                <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px;">
+                    <strong style="display:block; margin-bottom:8px;">Personalizzazione Squadra</strong>
+                    
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                        <span style="font-size:13px;">Squadra A</span>
+                        <input type="color" id="colorTeamA" value="#0d6efd" style="border:none; padding:0; background:none; cursor:pointer; height:25px; width:40px;">
+                    </div>
+
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <span style="font-size:13px;">Squadra B</span>
+                        <input type="color" id="colorTeamB" value="#e63946" style="border:none; padding:0; background:none; cursor:pointer; height:25px; width:40px;">
+                    </div>
+
+                    <label class="btn alt" style="width:100%; display:block; font-size:12px; text-align:center; padding:0.5rem;" id="btnUploadLogoLabel">
+                        <i class="fas fa-shield-alt"></i> Carica Logo Club 👑
+                        <input type="file" id="logoUpload" accept="image/*" style="display:none;">
+                    </label>
+                    <button class="btn" id="removeLogoBtn" style="width:100%; font-size:11px; margin-top:5px; display:none;">Rimuovi Logo</button>
+                </div>
+                <div class="legend"><span class="swatch" style="background:var(--blue)"></span> Blu (1–15)</div>
+                <div class="legend"><span class="swatch" style="background:var(--red)"></span> Rossi (1–15)</div>
+            </div>
+
+            <div class="group">
+                <strong>Strumenti</strong>
+                <div class="row" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <button class="btn selection-tool active" id="toolSelect">Selezione</button>
+                    <button class="btn alt" id="toolArrows">Frecce</button>
+                    <button class="btn alt" id="toolPen">Matita</button>
+                </div>
+                <div class="row" style="grid-template-columns: 1fr 1fr;">
+                    <label>Colore
+                        <select id="strokeColor">
+                            <option value="#ffffff">Bianco</option>
+                            <option value="#35d07f">Verde</option>
+                            <option value="#0d6efd">Blu</option>
+                            <option value="#e63946">Rosso</option>
+                            <option value="#f4d35e" selected>Giallo</option>
+                        </select>
+                    </label>
+                    <label>Spessore
+                        <select id="strokeWidth">
+                            <option value="3">Sottile</option>
+                            <option value="5" selected>Medio</option>
+                            <option value="7">Grosso</option>
+                        </select>
+                    </label>
+                </div>
+                <label class="chk" style="border:none;background:transparent;padding:0;box-shadow:none">
+                    <input type="checkbox" id="dashedToggle"> Linea tratteggiata
+                </label>
+                <div class="row" style="grid-template-columns: 1fr 1fr;">
+                    <button class="btn" id="undoGeneric">Annulla</button>
+                    <button class="btn" id="clearArrows">Cancella frecce</button>
+                </div>
+                <button class="btn" id="clearAll">Cancella tutto</button>
+            </div>
+
+            <div class="group">
+                <strong>Giocate</strong>
+                <input type="text" id="playName" placeholder="Nome giocata" />
+                <div class="row" style="grid-template-columns: 1fr 1fr;">
+                    <button class="btn" id="savePlay">Salva</button>
+                    <button class="btn alt" id="duplicatePlay">Duplica</button>
+                </div>
+                <select id="loadPlay"></select>
+                <div class="row" style="grid-template-columns: 1fr 1fr;">
+                    <button class="btn danger" id="deletePlay">Elimina</button>
+                    <button class="btn" id="btnLoadPlay">Carica</button>
+                </div>
+            </div>
+
+            <div class="group">
+                <strong>Animazione</strong>
+                <div class="row" style="grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button class="btn" id="recordStepBtn">Registra passo 👑</button>
+                    <label class="chk" style="display:flex;align-items:center;gap:8px;border:none;background:transparent;padding:.4rem .6rem;box-shadow:none">
+                        <input type="checkbox" id="autoRecord"> Auto al rilascio
+                    </label>
+                </div>
+
+                <div class="row" style="grid-template-columns: 1fr 1fr 1fr; gap:8px;">
+                    <button class="btn primary" id="playBtn">Play</button>
+                    <button class="btn alt" id="pauseBtn">Pause</button>
+                    <button class="btn" id="stopBtn">Stop</button>
+                </div>
+
+                <div class="row" style="grid-template-columns: auto 1fr; align-items:center;">
+                    Velocità (ms per passo)
+                    <input type="number" id="speedInput" min="100" step="100" value="800" />
+                </div>
+
+                <div class="row" style="grid-template-columns: 1fr; gap:8px;">
+                    <label>Scrubber (0 → N)
+                        <input type="range" id="scrubber" min="0" max="0" value="0" />
+                    </label>
+                    <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;">
+                        <button class="btn alt" id="prevFrameBtn">◀ Precedente</button>
+                        <div style="text-align:center;">Frame: <span id="scrubberVal">0</span> / <span id="frameTotal">0</span></div>
+                        <button class="btn alt" id="nextFrameBtn">Successivo ▶</button>
+                    </div>
+                </div>
+
+                <div class="row" style="grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button class="btn alt" id="clearTimelineBtn">Pulisci</button>
+                    <button class="btn" id="exportTimelineBtn">Esporta JSON</button>
+                </div>
+                <button class="btn alt" id="importTimelineBtn">Importa JSON</button>
+                <div style="font-size:12px;opacity:.8;">Frames salvati: <span id="frameCount">0</span></div>
+            </div>
+
+            <div class="group">
+                <strong>Export</strong>
+                <div class="row" style="grid-template-columns: 1fr;">
+                    <button class="btn" id="exportJpgBtn">Esporta immagine (JPG)</button>
+                    <button class="btn alt" id="exportVideoBtn">Esporta video (WebM) 👑</button>
+                    <button class="btn" id="exportMp4Btn">Esporta MP4 (beta) 👑</button>
+                    <button class="btn" id="shareLinkBtn" style="background: #7289da; color: white; margin-top: 5px;">
+                        <i class="fas fa-share-alt"></i> Condividi Link (Player) 👑
+                    </button>
+                    <small class="note">Il video include giocatori, pallone, frecce e linee. MP4 usa ffmpeg.wasm (può richiedere tempo la prima volta).</small>
+                    <div id="ffmpegStatus" class="note"></div>
+                </div>
+            </div>
+
+            <div class="group" style="display: none;">
+                <strong>Debug</strong>
+                <button class="btn" onclick="testFirebaseDebug()">🔧 Test Firebase</button>
+                <button class="btn alt" onclick="showFirebaseStatus()">📊 Stato Firebase</button>
+                <button class="btn" onclick="diagnoseFirebaseIssue()">🔍 Diagnostica</button>
+                <button class="btn alt" onclick="fixFirebaseConnection()">🔄 Reconnetti</button>
+            </div>
+        </aside>
+
+        <main class="stage">
+            <div class="board-viewport" id="boardViewport">
+                <div class="board-wrap" id="boardWrap">
+                    <div id="board" class="board">
+                        <img id="clubLogo" src="" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:200px; opacity:0.3; pointer-events:none; display:none; z-index:1;">
+                        
+                        <svg class="grid-overlay" id="grid" viewBox="0 0 1200 700" preserveAspectRatio="none"></svg>
+
+                        <svg class="lines" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
+                            <rect x="5" y="5" width="1190" height="690" fill="none" stroke="#fff" stroke-width="6" />
+                            <rect x="0" y="0" width="80" height="700" fill="rgba(255,255,255,.07)" />
+                            <rect x="1120" y="0" width="80" height="700" fill="rgba(255,255,255,.07)" />
+                            <line x1="80" y1="0" x2="80" y2="700" stroke="#fff" stroke-width="4" />
+                            <line x1="1120" y1="0" x2="1120" y2="700" stroke="#fff" stroke-width="4" />
+                            <line x1="309" y1="0" x2="309" y2="700" stroke="#fff" stroke-width="3" />
+                            <line x1="891" y1="0" x2="891" y2="700" stroke="#fff" stroke-width="3" />
+                            <line x1="500" y1="0" x2="500" y2="700" stroke="#fff" stroke-width="2" stroke-dasharray="8 10" />
+                            <line x1="697" y1="0" x2="697" y2="700" stroke="#fff" stroke-width="2" stroke-dasharray="8 10" />
+                            <line x1="600" y1="0" x2="600" y2="700" stroke="#fff" stroke-width="4" />
+                            <line x1="5" y1="50" x2="1195" y2="50" stroke="#fff" stroke-width="2" stroke-dasharray="4 8" />
+                            <line x1="5" y1="150" x2="1195" y2="150" stroke="#fff" stroke-width="2" stroke-dasharray="4 8" />
+                            <line x1="5" y1="550" x2="1195" y2="550" stroke="#fff" stroke-width="2" stroke-dasharray="4 8" />
+                            <line x1="5" y1="650" x2="1195" y2="650" stroke="#fff" stroke-width="2" stroke-dasharray="4 8" />
+                            <line x1="130" y1="0" x2="130" y2="700" stroke="#fff" stroke-width="2" stroke-dasharray="8 10"/>
+                            <line x1="1070" y1="0" x2="1070" y2="700" stroke="#fff" stroke-width="2" stroke-dasharray="8 10"/>
+                        </svg>
+
+                        <svg id="draw" viewBox="0 0 1200 700" preserveAspectRatio="none"></svg>
+                        <div id="players"></div>
+                        <div id="ball" class="ball" title="Pallone"></div>
+                        <div id="selectionBox" style="position:absolute; pointer-events:none; border:1px dashed var(--accent); background:rgba(0,194,255,0.1); z-index:5; display:none;"></div>
+                    </div>
+                </div>
+            </div>
+            <canvas id="exportCanvas" width="1200" height="700" style="position:fixed; top:-9999px; left:-9999px;"></canvas>
+        </main>
+    </div>
+
+    
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
